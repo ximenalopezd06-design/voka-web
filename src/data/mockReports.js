@@ -1,0 +1,42 @@
+export const mockReportDashboard = {
+  kpis: [
+    { id: 'sales', label: 'Ventas del periodo', value: '$125,430', comparison: '↑ 12% respecto al periodo anterior.', tone: 'pink', icon: 'money' },
+    { id: 'profit', label: 'Utilidad', value: '$48,200', tone: 'green', icon: 'trend' },
+    { id: 'transactions', label: 'Ventas realizadas', value: '584', tone: 'blue', icon: 'cart' },
+    { id: 'products', label: 'Productos vendidos', value: '3,820', tone: 'purple', icon: 'package' },
+    { id: 'ticket', label: 'Ticket promedio', value: '$214', tone: 'yellow', icon: 'receipt' },
+    { id: 'stock', label: 'Productos con stock bajo', value: '12', tone: 'orange', icon: 'warning' },
+    { id: 'requests', label: 'Solicitudes pendientes', value: '3', tone: 'pink', icon: 'clipboard' },
+    { id: 'employees', label: 'Empleados activos', value: '4', tone: 'blue', icon: 'users' },
+  ],
+  dailySales: [
+    { label: 'Lun', value: 14200 }, { label: 'Mar', value: 17850 }, { label: 'Mié', value: 15900 },
+    { label: 'Jue', value: 21300 }, { label: 'Vie', value: 24680 }, { label: 'Sáb', value: 19800 }, { label: 'Dom', value: 11700 },
+  ],
+  categorySales: [
+    { label: 'Dulces', value: 34, color: '#ef8cab' },
+    { label: 'Chocolates', value: 24, color: '#8d73cc' },
+    { label: 'Botanas', value: 18, color: '#f2b95d' },
+    { label: 'Bebidas', value: 16, color: '#63bfd2' },
+    { label: 'Otros', value: 8, color: '#aab6b9' },
+  ],
+  dailySummary: [
+    { id: 'day-01', date: '2026-07-29', sales: 86, articles: 548, averageTicket: 228, profit: 8120, status: 'COMPLETO' },
+    { id: 'day-02', date: '2026-07-28', sales: 79, articles: 503, averageTicket: 215, profit: 7460, status: 'COMPLETO' },
+    { id: 'day-03', date: '2026-07-27', sales: 71, articles: 461, averageTicket: 207, profit: 6380, status: 'COMPLETO' },
+    { id: 'day-04', date: '2026-07-26', sales: 95, articles: 626, averageTicket: 239, profit: 9210, status: 'COMPLETO' },
+    { id: 'day-05', date: '2026-07-25', sales: 102, articles: 688, averageTicket: 246, profit: 10140, status: 'COMPLETO' },
+    { id: 'day-06', date: '2026-07-24', sales: 83, articles: 529, averageTicket: 219, profit: 7790, status: 'REVISIÓN' },
+    { id: 'day-07', date: '2026-07-23', sales: 68, articles: 465, averageTicket: 198, profit: 5100, status: 'COMPLETO' },
+    { id: 'day-08', date: '2026-07-22', sales: 76, articles: 491, averageTicket: 211, profit: 6490, status: 'COMPLETO' },
+    { id: 'day-09', date: '2026-07-21', sales: 64, articles: 418, averageTicket: 203, profit: 4820, status: 'REVISIÓN' },
+    { id: 'day-10', date: '2026-07-20', sales: 72, articles: 479, averageTicket: 216, profit: 5910, status: 'COMPLETO' },
+  ],
+  shortcuts: [
+    { id: 'sales', title: 'Reporte de ventas', description: 'Ingresos, tickets y métodos de pago.', icon: 'chart' },
+    { id: 'inventory', title: 'Reporte de inventario', description: 'Existencias, movimientos y alertas.', icon: 'inventory' },
+    { id: 'purchases', title: 'Reporte de compras', description: 'Solicitudes, órdenes y proveedores.', icon: 'purchases' },
+    { id: 'products', title: 'Reporte de productos', description: 'Rotación, márgenes y categorías.', icon: 'products' },
+    { id: 'employees', title: 'Reporte de empleados', description: 'Actividad y desempeño del equipo.', icon: 'employees' },
+  ],
+}

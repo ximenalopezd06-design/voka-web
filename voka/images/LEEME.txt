@@ -1,0 +1,26 @@
+FOTOGRAFÍAS DE VOKA
+Coloca aquí tus fotografías reales:
+hero-chocolate-malvavisco.png — portada editorial generada a partir de las fotografías adjuntas
+historia.jpg — marca
+hershey.jpg
+kitkat.jpg
+kinder.jpg
+oreo.jpg
+chocolate.png
+malvavisco.jpg
+
+Logo opcional: logo.svg o logo.png, versión crema para header y footer.
+Consulta GUÍA.md para incorporarlo en los seis archivos HTML.
+
+Mientras falten fotografías se muestran placeholders de marca.
+Para usar otros nombres o extensiones, modifica image en script.js
+(productos) o data-photo en los HTML (portada e historia).
+
+Chocolate, Malvavisco, Oreo y Hershey ya contienen las imágenes adjuntas.
+KitKat y Kinder utilizan kitkat-menu.png y kinder-menu.png, con fondo Sand.
+
+El menú utiliza ahora chocolate-menu.png, malvavisco-menu.png,
+oreo-menu.png y hershey-menu.png: fondos reemplazados por Sand.
+Los archivos originales se conservan como referencia.
+
+Nuevos sabores: nutella.jpg y chipas.jpg (Clásica; fotografías pendientes).

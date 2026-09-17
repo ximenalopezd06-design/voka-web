@@ -1,0 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Quicksand:wght@500;600;700&display=swap');
+
+:root {
+  --font-heading: 'Montserrat', system-ui, sans-serif;
+  --font-body: 'Quicksand', system-ui, sans-serif;
+  --color-primary: #a93b5d;
+  --color-primary-hover: #8f2f4d;
+  --color-primary-container: #fb7e9e;
+  --color-primary-soft: #ffe6ed;
+  --color-secondary: #006783;
+  --color-secondary-container: #69c9ef;
+  --color-tertiary: #826900;
+  --color-error: #c72227;
+  --color-success: #19ad5a;
+  --color-surface: #f4fafd;
+  --color-surface-low: #edf5f8;
+  --color-surface-container: #e7eff2;
+  --color-white: #ffffff;
+  --color-text: #171d1f;
+  --color-text-soft: #5d4c4f;
+  --color-outline: #dce7ea;
+  --shadow-card: 0 14px 30px rgba(39, 57, 61, 0.08);
+  --shadow-pink: 0 12px 28px rgba(169, 59, 93, 0.18);
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 38px;
+  --sidebar-width: 288px;
+}

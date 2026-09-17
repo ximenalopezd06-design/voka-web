@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#EEE4DA">
+    <meta name="description" content="Mimiga Mía. Pequeños antojos, grandes momentos. Ese gustito que sí te mereces.">
+    <title>MIMIGA MÍA — Ese gustito que sí te mereces.</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#inicio">Ir al contenido</a>
+    <header class="site-header">
+      <a class="wordmark" href="#inicio" aria-label="Mimiga Mía, inicio">mimiga mía<span>PEQUEÑOS GUSTOS. MUY TUYOS.</span></a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="navigation" aria-label="Abrir menú"><span></span><span></span></button>
+      <nav id="navigation" class="navigation" aria-label="Navegación principal">
+        <a class="active" href="#inicio" aria-current="page">Inicio</a>
+        <span class="pending-link" aria-disabled="true" title="Próximamente">Catálogo</span>
+        <a href="#concepto">Nuestra historia</a>
+        <span class="pending-link" aria-disabled="true" title="Próximamente">Preguntas</span>
+        <span class="pending-link" aria-disabled="true" title="Próximamente">Contacto</span>
+        <div class="header-actions">
+          <!-- Sustituye estos placeholders por enlaces cuando estén disponibles. -->
+          <button class="icon-button" disabled aria-label="Instagram, próximamente" title="Instagram · Próximamente"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg></button>
+          <button class="icon-button" disabled aria-label="Carrito, próximamente" title="Carrito · Próximamente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h3l2.4 12h11.2L21 7H6M9 20h.01M18 20h.01"/></svg></button>
+          <button class="button button-small" disabled title="Pedidos disponibles próximamente">Pedir ahora <span aria-hidden="true">↗</span></button>
+        </div>
+      </nav>
+    </header>
+
+    <main id="inicio">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy reveal">
+          <p class="eyebrow"><span class="tiny-star" aria-hidden="true">✳</span> MIMIGA MÍA</p>
+          <h1 id="hero-title">Ese gustito<br>que sí <em>te<br class="desktop-break"> mereces.</em></h1>
+          <p class="hero-description">Pequeños antojos, grandes momentos. Un espacio creado para esos días en los que simplemente quieres consentirte.</p>
+          <div class="hero-actions">
+            <button class="button" disabled title="Nuestros antojos · Próximamente">Ver nuestros antojos <span aria-hidden="true">↗</span></button>
+            <a class="button button-outline" href="#concepto">Conoce Mimiga Mía</a>
+          </div>
+          <p class="hero-note"><span aria-hidden="true">♡</span> Un poquito de dulce. Un ratito para ti.</p>
+        </div>
+
+        <div class="hero-visual reveal">
+          <div class="visual-orbit" aria-hidden="true"></div>
+          <figure class="photo-frame">
+            <!-- FOTOGRAFÍA PRINCIPAL: sustituye el div photo-placeholder completo
+                 por <img class="hero-photo" src="foto-principal.jpg"
+                 alt="Describe aquí los postres que aparecen en tu fotografía">.
+                 Coloca foto-principal.jpg junto a este index.html. -->
+            <div class="photo-placeholder" role="img" aria-label="Espacio reservado para la fotografía principal de Mimiga Mía, con formas abstractas en tonos Sand y Dusty Pink">
+              <span class="photo-edition">EL ARTE DE CONSENTIRTE</span>
+              <div class="abstract-disc disc-back" aria-hidden="true"></div>
+              <div class="abstract-disc disc-front" aria-hidden="true"></div>
+              <div class="placeholder-brand" aria-hidden="true">mimiga<br><em>mía</em><span>ALGO BONITO ESTÁ POR LLEGAR</span></div>
+              <span class="photo-label">ESPACIO PARA TU FOTOGRAFÍA</span>
+            </div>
+          </figure>
+          <div class="round-seal" aria-label="Hecho para disfrutarse"><span>HECHO PARA</span><span class="seal-heart" aria-hidden="true">♡</span><span>DISFRUTARSE</span></div>
+          <p class="visual-caption"><span>01 / PEQUEÑOS PLACERES</span><span>muy tuyos <span aria-hidden="true">↗</span></span></p>
+        </div>
+      </section>
+
+      <section class="quote-section reveal" aria-label="Nuestra filosofía">
+        <span class="quote-star" aria-hidden="true">✳</span>
+        <p>Porque no necesitas una ocasión especial<br>para darte <em>algo bonito.</em></p>
+        <span class="quote-star" aria-hidden="true">✳</span>
+      </section>
+
+      <section class="concept-section reveal" id="concepto" aria-labelledby="concept-title">
+        <div><p class="eyebrow">LA ESENCIA DE MIMIGA MÍA</p><h2 id="concept-title">Un momento <em>para ti.</em></h2></div>
+        <div class="concept-copy"><p>Mimiga Mía nace de la idea de disfrutar los pequeños gustos de la vida. Una galleta, una nieve o ese postre que simplemente se te antojó.</p><ul class="concept-tags"><li><span aria-hidden="true">♡</span> Dulce</li><li><span aria-hidden="true">✧</span> Especial</li><li><span aria-hidden="true">☼</span> Para ti</li></ul></div>
+      </section>
+    </main>
+    <footer><a class="footer-brand" href="#inicio">mimiga mía</a><p>Pequeños antojos, grandes momentos.</p><span>HECHO CON CARIÑO <span aria-hidden="true">♡</span></span></footer>
+  </body>
+</html>
