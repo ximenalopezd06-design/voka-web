@@ -27,7 +27,7 @@ const productPresentation = [
   { id: 7, name: 'Nutella', category: 'Cookies', description: 'Galleta estilo NY con Nutella.', image: 'images/nutella.jpg' }
 ];
 // API de inventario. Cambia esta URL si publicas otra implementación.
-const INVENTORY_API = "https://script.google.com/macros/s/AKfycbwsnf2aQz1poijgFILoazH2ndsE6ApnesqAjVYkKXnfS4Ue0B816WCogFvo94qwrQSdzA/exec"
+const INVENTORY_API = "https://script.google.com/macros/s/AKfycbwsnf2aQz1poijgFILoazH2ndsE6ApnesqAjVYkKXnfS4Ue0B816WCogFvo94qwrQSdzA/exec";
 const normalizeProductName = name => String(name).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
 function presentationFor(row) {
   const name = normalizeProductName(row.producto);
@@ -45,12 +45,6 @@ function inventoryNumber(value, field) {
 // Adaptador activo de Google Apps Script. Para otra API, reemplaza esta función.
 // La columna imagen se ignora: las fotos se asignan localmente por nombre/id.
 let inventoryJSONPRequest = null;
-let receiveInventoryJSONP = null;
-// Callback público que invoca Apps Script: recibirInventarioVOKA([...]).
-// Las respuestas sin una solicitud activa (por ejemplo, tardías) se ignoran.
-window.recibirInventarioVOKA = function(data) {
-  if (receiveInventoryJSONP) receiveInventoryJSONP(data);
-};
 function solicitarInventarioJSONP() {
   // Comparte la petición en curso para no duplicar scripts ni callbacks.
   if (inventoryJSONPRequest) return inventoryJSONPRequest;
@@ -64,13 +58,18 @@ function solicitarInventarioJSONP() {
       clearTimeout(timeout);
       script.onerror = null;
       script.remove();
-      receiveInventoryJSONP = null;
+      delete window.recibirInventarioVOKA;
       if (error) reject(error);
       else resolve(data);
     }
-    receiveInventoryJSONP = data => finish(null, data);
+    // Callback temporal: se retira tanto al recibir datos como al fallar.
+    window.recibirInventarioVOKA = function(data) {
+      console.log("Inventario recibido desde Google Sheets:", data);
+      finish(null, data);
+    };
     script.async = true;
-    script.src = INVENTORY_API + '?callback=recibirInventarioVOKA';
+    // Evita reutilizar una respuesta anterior al recargar o volver a la página.
+    script.src = `${INVENTORY_API}?callback=recibirInventarioVOKA&_=${Date.now()}`;
     script.onerror = () => finish(new Error('No se pudo cargar el script del inventario'));
     timeout = setTimeout(() => finish(new Error('El inventario no respondió en 10 segundos')), 10000);
     document.body.appendChild(script);
@@ -150,7 +149,7 @@ async function initializeInventory() {
   } catch (error) {
     console.error('No se pudo cargar el inventario de VOKA:', error);
     inventoryReady = false;
-    if ($('#products')) $('#products').textContent = 'No pudimos cargar los antojos. Recarga la página para intentar de nuevo.';
+    if ($('#products')) $('#products').textContent = 'No pudimos verificar la disponibilidad. Recarga para intentar de nuevo.';
     if (form) {
       form.hidden = true;
       $('#cart-items').textContent = 'No pudimos verificar tu pedido. Recarga para intentar de nuevo; tu carrito sigue guardado.';
