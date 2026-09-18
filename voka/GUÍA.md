@@ -69,7 +69,7 @@ Instagram abre una pestaña nueva, está visible en todos los headers y footers 
 
 En Menú elige una cantidad y pulsa **Agregar al pedido**. El icono cuenta unidades totales. Abre **Pedido** para aumentar, disminuir o eliminar productos. Al reducir a cero se elimina esa línea. El límite es 99 unidades por sabor.
 
-El formulario aparece cuando hay productos. Para Entrega, la dirección es obligatoria. Con Recoger, se oculta y no se incluye en el mensaje. Teléfono, nombre, día y hora son obligatorios. El total incluye productos; entrega y disponibilidad se confirman con VOKA.
+El formulario aparece cuando hay productos. El único método es Recoger. Es obligatorio seleccionar UAS, ITMAZ - Pradera o Concordia como punto de entrega; no se solicita dirección. Teléfono, nombre, día y hora son obligatorios. El total incluye productos; entrega y disponibilidad se confirman con VOKA.
 
 ## 8. localStorage
 
@@ -83,7 +83,7 @@ Se usa una clave nueva para evitar que los productos de ejemplo de la versión a
 
 Ya está configurado `settings.whatsappNumber: '526941166171'`.
 
-El contacto directo abre `https://wa.me/526941166171`. El formulario genera el resumen con nombre, teléfono, productos, cantidades, precios, total, entrega, dirección cuando corresponde, día, hora y notas. `encodeURIComponent()` conserva correctamente espacios, acentos y saltos de línea en la URL.
+El contacto directo abre `https://wa.me/526941166171`. El formulario genera el resumen con nombre, teléfono, productos, cantidades, precios, total, método Recoger, punto de entrega, día, hora y notas. `encodeURIComponent()` conserva correctamente espacios, acentos y saltos de línea en la URL.
 
 El cliente revisa y pulsa **Enviar dentro de WhatsApp**. Abrir el enlace no significa que el pedido ya se haya enviado o confirmado. Al pulsar Enviar pedido por WhatsApp con datos válidos, se genera primero el mensaje completo y después se vacían el carrito guardado y el formulario. El cliente debe pulsar Enviar dentro de WhatsApp; la web no puede detectar ese paso. Si cierra WhatsApp sin enviarlo, el carrito ya estará vacío. Los intentos con datos inválidos no vacían el pedido.
 
@@ -98,7 +98,7 @@ Para cambiar el número, edita `settings.whatsappNumber` con código de país y 
 5. Agrega 2 Hershey, 1 Kinder y 1 Oreo: el icono debe marcar 4 y el total debe ser **$225.00** con los precios actuales.
 6. Navega a Historia y después Pedido; recarga y confirma que el carrito persiste.
 7. Prueba aumentar, disminuir y eliminar. Vacía el carrito para comprobar el estado vacío.
-8. Completa el formulario y prueba Recoger y Entrega. Comprueba que no permite enviar sin dirección cuando eliges Entrega.
+8. Completa el formulario y comprueba que no permite enviar sin seleccionar un punto. Prueba UAS, ITMAZ - Pradera y Concordia y revisa el resumen.
 9. Abre WhatsApp y revisa el número, el texto y el total. Puedes cerrar sin enviar durante la prueba.
 10. Abre Instagram desde header, inicio, contacto y footer.
 11. Estrecha la ventana: menú hamburguesa y productos en una columna. Escape cierra el menú.
@@ -146,3 +146,13 @@ En `script.js`, los ocho productos están en `localProducts`. Cada uno comienza 
 Busca `// FUTURA CONEXIÓN CON INVENTARIO EXTERNO`. Reemplaza únicamente el cuerpo de `inventorySource.load()` por la petición a tu API, devolviendo una promesa con el arreglo de productos. Transforma allí los campos externos a números y booleanos reales. Un fallo de carga bloquea la compra y mantiene el carrito guardado.
 
 `isAvailable`, `productLimit` y `reconcileCart` contienen las reglas separadas de la presentación. Este inventario local no reserva ni descuenta unidades entre clientes. Para inventario compartido, la fuente externa deberá validar y reservar las unidades en servidor al confirmar un pedido; abrir WhatsApp no equivale a confirmación.
+
+## Conexión activa con Google Sheets
+
+La fuente ahora es `INVENTORY_API` y la función `cargarInventario()` en `script.js`. Precios y stock se editan en Google Sheets, no en JavaScript. `productPresentation` conserva únicamente las imágenes, descripciones y orden locales; la columna `imagen` de la API se ignora.
+
+La API debe devolver un arreglo con `id`, `producto`, `precio` y `stock`. Los números pueden ser números JSON o cadenas numéricas; no se aceptan valores vacíos, negativos, fracciones de stock ni ids duplicados. El estado se deriva del stock: 4 o más DISPONIBLE, de 1 a 3 ÚLTIMAS PIEZAS, 0 AGOTADO. La columna `disponible` no reemplaza estas reglas.
+
+La carga se ejecuta al abrir cada página y al restaurarla desde la caché de navegación. El carrito se valida contra el inventario recibido. Si la API falla, se muestra un aviso, se registra `console.error` y no se borran los datos guardados ni se usan existencias ficticias como respaldo. La carga utiliza JSONP con el callback global recibirInventarioVOKA y un límite de 10 segundos. El script temporal se elimina al recibir datos, al fallar o al agotarse el tiempo.
+
+En la verificación inicial, la URL redirigió al inicio de sesión de Google. Publica la aplicación web con acceso para Cualquier persona (incluidos visitantes sin iniciar sesión) y ejecución como propietario. Prueba /exec en una ventana de incógnito: debe mostrar JSON sin pedir inicio de sesión. Si cambia la URL, actualiza INVENTORY_API. Esta integración consulta inventario; no reserva ni descuenta stock en Google Sheets.

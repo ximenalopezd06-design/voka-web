@@ -14,38 +14,99 @@ const settings = {
   location: 'Concordia y Mazatlán, Sinaloa'
 };
 
-/* PRODUCTOS, PRECIOS, CATEGORÍAS Y FOTOGRAFÍAS
-   Agrega o elimina objetos; cada id debe ser único y no cambiar después.
-   Los precios son números en pesos mexicanos. Copia tus fotos en /images
-   y escribe su ruta en image. Si faltan, aparece un placeholder de marca. */
-// Stock local de ejemplo: ajusta las unidades reales antes de publicar.
-const localProducts = [
-  // Clásica: cambia price para editar su precio en MXN.
-  { id: 8, name: 'Clásica', category: 'Cookies', price: 50, stock: 5, available: true, description: 'Galleta estilo NY con chispas de chocolate.', image: 'images/chipas.jpg' },
-  // Hershey: cambia price para editar su precio en MXN.
-  { id: 1, name: 'Hershey', category: 'Cookies', price: 55, stock: 5, available: true, description: 'Galleta estilo NY con chocolate Hershey.', image: 'images/hershey-menu.png' },
-  // KitKat: cambia price para editar su precio en MXN.
-  { id: 2, name: 'KitKat', category: 'Cookies', price: 55, stock: 5, available: true, description: 'Galleta estilo NY con trozos de KitKat.', image: 'images/kitkat-menu.png' },
-  // Kinder: cambia price para editar su precio en MXN.
-  { id: 3, name: 'Kinder', category: 'Cookies', price: 55, stock: 5, available: true, description: 'Galleta estilo NY con chocolate Kinder.', image: 'images/kinder-menu.png' },
-  // Malvavisco: cambia price para editar su precio en MXN.
-  { id: 6, name: 'Malvavisco', category: 'Cookies', price: 60, stock: 5, available: true, description: 'Galleta estilo NY con malvavisco.', image: 'images/malvavisco-menu.png' },
-  // Chocolate: cambia price para editar su precio en MXN.
-  { id: 5, name: 'Chocolate', category: 'Cookies', price: 60, stock: 5, available: true, description: 'Galleta estilo NY con abundante chocolate.', image: 'images/chocolate-menu.png' },
-  // Oreo: cambia price para editar su precio en MXN.
-  { id: 4, name: 'Oreo', category: 'Cookies', price: 60, stock: 5, available: true, description: 'Galleta estilo NY con galleta Oreo.', image: 'images/oreo-menu.png' },
-  // Nutella: cambia price para editar su precio en MXN.
-  { id: 7, name: 'Nutella', category: 'Cookies', price: 60, stock: 5, available: true, description: 'Galleta estilo NY con Nutella.', image: 'images/nutella.jpg' }
+// Presentación local: conserva imágenes, descripciones y el orden del menú.
+// Los precios y las existencias se obtienen EXCLUSIVAMENTE de Google Sheets.
+const productPresentation = [
+  { id: 8, name: 'Clásica', category: 'Cookies', description: 'Galleta estilo NY con chispas de chocolate.', image: 'images/chipas.jpg' },
+  { id: 1, name: 'Hershey', category: 'Cookies', description: 'Galleta estilo NY con chocolate Hershey.', image: 'images/hershey-menu.png' },
+  { id: 2, name: 'KitKat', category: 'Cookies', description: 'Galleta estilo NY con trozos de KitKat.', image: 'images/kitkat-menu.png' },
+  { id: 3, name: 'Kinder', category: 'Cookies', description: 'Galleta estilo NY con chocolate Kinder.', image: 'images/kinder-menu.png' },
+  { id: 6, name: 'Malvavisco', category: 'Cookies', description: 'Galleta estilo NY con malvavisco.', image: 'images/malvavisco-menu.png' },
+  { id: 5, name: 'Chocolate', category: 'Cookies', description: 'Galleta estilo NY con abundante chocolate.', image: 'images/chocolate-menu.png' },
+  { id: 4, name: 'Oreo', category: 'Cookies', description: 'Galleta estilo NY con galleta Oreo.', image: 'images/oreo-menu.png' },
+  { id: 7, name: 'Nutella', category: 'Cookies', description: 'Galleta estilo NY con Nutella.', image: 'images/nutella.jpg' }
 ];
+// API de inventario. Cambia esta URL si publicas otra implementación.
+const INVENTORY_API = "https://script.google.com/macros/s/AKfycbwsnf2aQz1poijgFILoazH2ndsE6ApnesqAjVYkKXnfS4Ue0B816WCogFvo94qwrQSdzA/exec"
+const normalizeProductName = name => String(name).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+function presentationFor(row) {
+  const name = normalizeProductName(row.producto);
+  const aliases = { hersheys: 'hershey', chipas: 'clasica', chispas: 'clasica' };
+  return productPresentation.find(product => normalizeProductName(product.name) === (aliases[name] || name))
+    || productPresentation.find(product => product.id === Number(row.id));
+}
+function inventoryNumber(value, field) {
+  if ((typeof value !== 'number' && typeof value !== 'string') || String(value).trim() === '') throw new Error(`Campo ${field} vacío o inválido`);
+  const number = Number(value);
+  if (!Number.isFinite(number) || number < 0) throw new Error(`Campo ${field} inválido`);
+  return number;
+}
 // FUTURA CONEXIÓN CON INVENTARIO EXTERNO
-// Reemplaza SOLO el cuerpo de inventorySource.load() por fetch a tu API.
-// Debe devolver Promise<Array> con los mismos campos que localProducts.
-// Valida la respuesta HTTP y transforma los datos de Sheets/Supabase aquí.
-// No incluyas claves privadas. Reservar/descontar stock requiere un servidor;
-// agregar al carrito o abrir WhatsApp no confirma ni descuenta inventario.
-const inventorySource = {
-  async load() { return localProducts.map(product => ({ ...product })); }
+// Adaptador activo de Google Apps Script. Para otra API, reemplaza esta función.
+// La columna imagen se ignora: las fotos se asignan localmente por nombre/id.
+let inventoryJSONPRequest = null;
+let receiveInventoryJSONP = null;
+// Callback público que invoca Apps Script: recibirInventarioVOKA([...]).
+// Las respuestas sin una solicitud activa (por ejemplo, tardías) se ignoran.
+window.recibirInventarioVOKA = function(data) {
+  if (receiveInventoryJSONP) receiveInventoryJSONP(data);
 };
+function solicitarInventarioJSONP() {
+  // Comparte la petición en curso para no duplicar scripts ni callbacks.
+  if (inventoryJSONPRequest) return inventoryJSONPRequest;
+  inventoryJSONPRequest = new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    let settled = false;
+    let timeout;
+    function finish(error, data) {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      script.onerror = null;
+      script.remove();
+      receiveInventoryJSONP = null;
+      if (error) reject(error);
+      else resolve(data);
+    }
+    receiveInventoryJSONP = data => finish(null, data);
+    script.async = true;
+    script.src = INVENTORY_API + '?callback=recibirInventarioVOKA';
+    script.onerror = () => finish(new Error('No se pudo cargar el script del inventario'));
+    timeout = setTimeout(() => finish(new Error('El inventario no respondió en 10 segundos')), 10000);
+    document.body.appendChild(script);
+  }).finally(() => { inventoryJSONPRequest = null; });
+  return inventoryJSONPRequest;
+}
+async function cargarInventario() {
+    // JSONP sustituye únicamente el transporte; se conserva el adaptador actual.
+    const rows = await solicitarInventarioJSONP();
+    if (!Array.isArray(rows)) throw new Error('La API debe devolver un arreglo JSON');
+    const ids = new Set();
+    const mapped = rows.map(row => {
+      if (!row || typeof row.producto !== 'string' || !row.producto.trim()) throw new Error('Producto sin nombre');
+      const id = inventoryNumber(row.id, 'id');
+      const price = inventoryNumber(row.precio, 'precio');
+      const stock = inventoryNumber(row.stock, 'stock');
+      if (!Number.isSafeInteger(id) || !Number.isSafeInteger(stock) || ids.has(id)) throw new Error('ID duplicado o stock/id no entero');
+      ids.add(id);
+      const local = presentationFor(row);
+      return {
+        id, name: local?.name || row.producto.trim(), category: local?.category || 'Cookies',
+        description: local?.description || 'Un nuevo antojo de VOKA.',
+        image: local?.image || '', price, stock, available: stock > 0
+      };
+    });
+    // Mantiene el orden visual actual aunque las filas de Sheets se reordenen.
+    const order = name => {
+      const index = productPresentation.findIndex(product => product.name === name);
+      return index < 0 ? productPresentation.length : index;
+    };
+    return mapped.sort((a, b) => order(a.name) - order(b.name));
+}
+const inventorySource = { load: cargarInventario };
+function availabilityLabel(product) {
+  return product.stock >= 4 ? 'DISPONIBLE' : product.stock >= 1 ? 'ÚLTIMAS PIEZAS' : 'AGOTADO';
+}
 let products = [];
 let categories = [];
 let inventoryReady = false;
@@ -86,10 +147,14 @@ async function initializeInventory() {
     inventoryReady = true;
     restoreCart();
     if ($('#products')) { renderFilters(); renderProducts(); }
-  } catch {
+  } catch (error) {
+    console.error('No se pudo cargar el inventario de VOKA:', error);
     inventoryReady = false;
     if ($('#products')) $('#products').textContent = 'No pudimos cargar los antojos. Recarga la página para intentar de nuevo.';
-    if (form) form.hidden = true;
+    if (form) {
+      form.hidden = true;
+      $('#cart-items').textContent = 'No pudimos verificar tu pedido. Recarga para intentar de nuevo; tu carrito sigue guardado.';
+    }
     notify('No pudimos verificar la disponibilidad. Recarga para intentar de nuevo.');
   }
 }
@@ -119,9 +184,13 @@ function loadCart() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
     if (!Array.isArray(saved)) return {};
-    return Object.fromEntries(saved.filter(item => item && getProduct(item.id) &&
-      Number.isInteger(item.quantity) && item.quantity > 0 && item.quantity <= MAX_QUANTITY)
-      .map(item => [getProduct(item.id).id, item.quantity]));
+    const restored = {};
+    for (const item of saved) {
+      if (!item || !Number.isInteger(item.quantity) || item.quantity <= 0 || item.quantity > MAX_QUANTITY) continue;
+      const product = item.name ? products.find(product => normalizeProductName(product.name) === normalizeProductName(item.name)) : getProduct(item.id);
+      if (product) restored[product.id] = Math.min(MAX_QUANTITY, (restored[product.id] || 0) + item.quantity);
+    }
+    return restored;
   } catch { return {}; }
 }
 let cart = {};
@@ -175,7 +244,7 @@ function renderProducts() {
   $('#products').innerHTML = visible.length ? visible.map(product => `
     <article class="product ${isAvailable(product) ? '' : 'sold-out'}" data-product="${product.id}">
       <div class="product-image media" data-photo="${escapeHtml(product.image)}" data-alt="${escapeHtml(product.name)}"><span class="product-monogram" aria-hidden="true">voka</span><small>FOTOGRAFÍA PRÓXIMAMENTE</small></div>
-      <p class="product-category">${escapeHtml(product.category)}</p><p class="availability ${isAvailable(product) ? 'in-stock' : 'out-of-stock'}">${isAvailable(product) ? 'Disponible' : 'AGOTADO'}</p>
+      <p class="product-category">${escapeHtml(product.category)}</p><p class="availability ${isAvailable(product) ? 'in-stock' : 'out-of-stock'}">${availabilityLabel(product)}</p>
       <div class="product-title"><h3>${escapeHtml(product.name)}</h3><span class="price">${money(product.price)}</span></div>
       <p class="product-description">${escapeHtml(product.description)}</p>
       <div class="product-controls"><div class="quantity" role="group" aria-label="Cantidad de ${escapeHtml(product.name)}"><button data-quantity="-1" aria-label="Disminuir ${escapeHtml(product.name)}" ${(quantities.get(product.id) || 1) === 1 ? 'disabled' : ''}>−</button><output aria-live="polite">${quantities.get(product.id) || 1}</output><button data-quantity="1" aria-label="Aumentar ${escapeHtml(product.name)}" ${quantities.get(product.id) === MAX_QUANTITY ? 'disabled' : ''}>+</button></div><button class="button" data-add="${product.id}" aria-label="Agregar ${escapeHtml(product.name)} al pedido">Agregar al pedido ↗</button></div>
@@ -233,9 +302,11 @@ $('#products')?.addEventListener('click', event => {
 
 
 const form = $('#checkout-form');
+const pickupPoints = ['UAS', 'ITMAZ - Pradera', 'Concordia'];
 
 function renderSummary() {
-  $('#order-summary').innerHTML = cartEntries().map(({ product, quantity }) => `<div class="summary-row"><span>${quantity} × ${escapeHtml(product.name)}</span><span>${money(product.price * quantity)}</span></div>`).join('') + `<div class="cart-total"><strong>Total de productos</strong><strong>${money(cartTotal())}</strong></div>`;
+  const pickupPoint = form.elements.pickupPoint.value;
+  $('#order-summary').innerHTML = cartEntries().map(({ product, quantity }) => `<div class="summary-row"><span>${quantity} × ${escapeHtml(product.name)}</span><span>${money(product.price * quantity)}</span></div>`).join('') + `<div class="cart-total"><strong>Total de productos</strong><strong>${money(cartTotal())}</strong></div><div class="summary-row"><span>Método: Recoger</span></div><div class="summary-row"><span>Punto de entrega: ${escapeHtml(pickupPoint || 'Selecciona un punto')}</span></div>`;
 }
 function renderCart() {
   const entries = cartEntries();
@@ -266,11 +337,9 @@ $('#cart-items')?.addEventListener('click', event => {
   const replacement = document.querySelector(`[data-cart-id="${id}"] [${action.hasAttribute('data-remove') ? 'data-remove' : `data-cart-change="${action.dataset.cartChange}"`}]`);
   (replacement && !replacement.disabled ? replacement : document.querySelector('.order-basket .text-link')).focus();
 });
-form?.elements.delivery.addEventListener('change', () => {
-  const delivery = form.elements.delivery.value === 'Entrega';
-  $('#address-field').hidden = !delivery;
-  form.elements.address.disabled = !delivery;
-  form.elements.address.required = delivery;
+form?.elements.pickupPoint.addEventListener('change', () => {
+  form.elements.pickupPoint.setCustomValidity('');
+  renderSummary();
 });
 
 // Solo se guarda el carrito. Los datos personales permanecen en el formulario.
@@ -280,7 +349,7 @@ function createOrderMessage(data) {
     `Nombre: ${data.name}`, `Teléfono: ${data.phone}`, '', 'Pedido:',
     ...cartEntries().map(({ product, quantity }) => `${quantity} ${product.name} — ${money(quantity * product.price)} (${money(product.price)} c/u)`),
     '', `Total de productos: ${money(cartTotal())} MXN`, 'Entrega y disponibilidad por confirmar.', '',
-    `Entrega: ${data.delivery}`, ...(data.delivery === 'Entrega' ? [`Dirección: ${data.address}`] : []),
+    'Método: Recoger', `Punto de entrega: ${data.pickupPoint}`,
     `Día: ${data.day}`, `Hora aproximada: ${data.time}`, '',
     `Notas: ${data.notes || 'Sin cambios.'}`, '', 'Gracias.'
   ].join('\n');
@@ -310,8 +379,8 @@ form?.addEventListener('submit', event => {
   const phoneInput = form.elements.phone;
   const phoneDigits = phoneInput.value.replace(/\D/g, '');
   phoneInput.setCustomValidity(phoneDigits.length >= 10 && phoneDigits.length <= 15 ? '' : 'Escribe un teléfono de 10 a 15 dígitos.');
-  const addressInput = form.elements.address;
-  addressInput.setCustomValidity(form.elements.delivery.value === 'Entrega' && !addressInput.value.trim() ? 'Escribe la dirección de entrega.' : '');
+  const pickupInput = form.elements.pickupPoint;
+  pickupInput.setCustomValidity(pickupPoints.includes(pickupInput.value) ? '' : 'Selecciona un punto de entrega.');
   if (!form.reportValidity()) return;
   const data = Object.fromEntries([...new FormData(form)].map(([key, value]) => [key, value.trim()]));
   const url = whatsappUrl(createOrderMessage(data));
@@ -325,9 +394,6 @@ form?.addEventListener('submit', event => {
   cart = {};
   saveCart();
   form.reset();
-  $('#address-field').hidden = true;
-  form.elements.address.disabled = true;
-  form.elements.address.required = false;
   renderCart();
   $('#order-feedback').textContent = 'Tu carrito quedó limpio 💗 Revisa el mensaje en WhatsApp y pulsa Enviar para completar tu pedido.';
   $('.order-basket .text-link').focus();
@@ -365,11 +431,14 @@ if ('IntersectionObserver' in window && !motionReduced.matches) {
   $$('.reveal').forEach(element => observer.observe(element));
 }
 window.addEventListener('storage', event => { if (event.key === STORAGE_KEY || event.key === null) { restoreCart(); } });
-if (form) form.hidden = true;
-if ($('#products')) $('#products').textContent = 'Cargando antojos…';
+if (form) { form.hidden = true; $('#cart-items').textContent = 'Cargando productos...'; }
+if ($('#products')) $('#products').textContent = 'Cargando productos...';
 initializeInventory();
 updateHeader();
 // El catálogo ya carga sus propias fotografías.
 $$('.hero, .story').forEach(section => loadPhotos(section));
 // Al volver desde otra página o pestaña, se recupera el carrito actualizado.
-window.addEventListener('pageshow', () => { restoreCart(); });
+window.addEventListener('pageshow', event => {
+  if (event.persisted) { inventoryReady = false; if (form) form.hidden = true; initializeInventory(); }
+  else restoreCart();
+});
