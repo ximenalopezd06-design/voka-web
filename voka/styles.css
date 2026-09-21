@@ -447,6 +447,7 @@ h1 {
   overflow:hidden;
   border-radius:10px;
   background:var(--sand);
+  background-image:none;
   color:var(--burgundy);
   isolation:isolate;
 }

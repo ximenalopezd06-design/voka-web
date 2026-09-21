@@ -242,7 +242,10 @@ function renderProducts() {
   $('#product-count').textContent = `${visible.length} productos en ${activeCategory}`;
   $('#products').innerHTML = visible.length ? visible.map(product => `
     <article class="product ${isAvailable(product) ? '' : 'sold-out'}" data-product="${product.id}">
-      <div class="product-brand-card" aria-hidden="true"><span class="product-brand-name">voka</span><span class="product-brand-tagline">ese gustito ♡</span></div>
+      <div class="product-brand-card">
+        <span class="product-brand-name">voka</span>
+        <span class="product-brand-tagline">ese gustito ♡</span>
+      </div>
       <p class="product-category">${escapeHtml(product.category)}</p><p class="availability ${isAvailable(product) ? 'in-stock' : 'out-of-stock'}">${availabilityLabel(product)}</p>
       <div class="product-title"><h3>${escapeHtml(product.name)}</h3><span class="price">${money(product.price)}</span></div>
       <p class="product-description">${escapeHtml(product.description)}</p>
