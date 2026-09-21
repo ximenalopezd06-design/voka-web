@@ -242,16 +242,15 @@ function renderProducts() {
   $('#product-count').textContent = `${visible.length} productos en ${activeCategory}`;
   $('#products').innerHTML = visible.length ? visible.map(product => `
     <article class="product ${isAvailable(product) ? '' : 'sold-out'}" data-product="${product.id}">
-      <div class="product-image media" data-photo="${escapeHtml(product.image)}" data-alt="${escapeHtml(product.name)}"><span class="product-monogram" aria-hidden="true">voka</span><small>FOTOGRAFÍA PRÓXIMAMENTE</small></div>
+      <div class="product-brand-card" aria-hidden="true"><span class="product-brand-name">voka</span><span class="product-brand-tagline">ese gustito ♡</span></div>
       <p class="product-category">${escapeHtml(product.category)}</p><p class="availability ${isAvailable(product) ? 'in-stock' : 'out-of-stock'}">${availabilityLabel(product)}</p>
       <div class="product-title"><h3>${escapeHtml(product.name)}</h3><span class="price">${money(product.price)}</span></div>
       <p class="product-description">${escapeHtml(product.description)}</p>
       <div class="product-controls"><div class="quantity" role="group" aria-label="Cantidad de ${escapeHtml(product.name)}"><button data-quantity="-1" aria-label="Disminuir ${escapeHtml(product.name)}" ${(quantities.get(product.id) || 1) === 1 ? 'disabled' : ''}>−</button><output aria-live="polite">${quantities.get(product.id) || 1}</output><button data-quantity="1" aria-label="Aumentar ${escapeHtml(product.name)}" ${quantities.get(product.id) === MAX_QUANTITY ? 'disabled' : ''}>+</button></div><button class="button" data-add="${product.id}" aria-label="Agregar ${escapeHtml(product.name)} al pedido">Agregar al pedido ↗</button></div>
     </article>`).join('') : '<div class="empty-products"><h3>Algo especial está por llegar.</h3><p>Pronto encontrarás nuevos antojos en esta categoría.</p><button class="button outline" data-show-all>Ver todos los productos</button></div>';
   refreshProductControls();
-  loadPhotos($('#products'));
 }
-// Actualiza controles sin reemplazar imágenes ni perder el foco del usuario.
+// Actualiza controles sin perder el foco del usuario.
 function refreshProductControls() {
   document.querySelectorAll('[data-product]').forEach(card => {
     const product = getProduct(card.dataset.product);
